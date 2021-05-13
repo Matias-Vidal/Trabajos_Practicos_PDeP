@@ -6,10 +6,7 @@ import Text.Show.Functions()
 
 type Accion = (Jugador->Jugador)
 
-data Propiedad = Propiedad{
-   nombreDePropiedad :: String,
-   valor :: Int
-}deriving (Show)
+type Propiedad = (String, Int)
 
 data Jugador = Jugador {
 nombre :: String,
@@ -41,7 +38,7 @@ aplicarTransaccionDeDinero :: Int->Accion
 aplicarTransaccionDeDinero valorDeTransaccion jugador = jugador {dinero = dinero jugador + valorDeTransaccion}
 
 agregarPropiedad :: Propiedad->Accion
-agregarPropiedad propiedadActual jugador = jugador {propiedadesActuales = propiedadesActuales jugador ++ [propiedadActual]}
+agregarPropiedad propiedad jugador = jugador {propiedadesActuales = propiedad : propiedadesActuales jugador }
 
 añadirAccion :: Accion -> Jugador -> Jugador
 añadirAccion accion jugador = jugador {acciones = accion : acciones jugador}
@@ -50,23 +47,29 @@ pasarPorElBanco :: Accion
 pasarPorElBanco jugador = (cambiarTacticaDeJuego "Comprador Compulsivo").(aplicarTransaccionDeDinero 40) $ jugador 
 
 enojarse :: Accion
-enojarse jugador = aplicarTransaccionDeDinero 50 jugador
+enojarse jugador = (añadirAccion gritar).(aplicarTransaccionDeDinero 50) $ jugador
 
 gritar :: Accion
 gritar jugador = jugador {nombre = "AHHHH " ++ nombre jugador}
 
 subastar :: Propiedad -> Accion
 subastar propiedad jugador   
-   | (esAccionista jugador) || (esOferenteSingular jugador) = 
-      (agregarPropiedad propiedad).(aplicarTransaccionDeDinero (-(valor propiedad))) $ jugador
+   | (esAccionista jugador) || (esOferenteSingular jugador) = adquirirPropiedad propiedad jugador
    | otherwise = jugador
 
 alquiler :: Int -> Int
 alquiler unValor | unValor < 150 = 10
                  | otherwise = 20
 
+valorDeUnaPropiedad :: Propiedad -> Int
+valorDeUnaPropiedad propiedad = snd propiedad
+
+adquirirPropiedad :: Propiedad -> Jugador -> Jugador
+adquirirPropiedad propiedad jugador = 
+   (agregarPropiedad propiedad).(aplicarTransaccionDeDinero (-(valorDeUnaPropiedad propiedad))) $ jugador
+
 costoDeAlquiler :: Jugador -> Int
-costoDeAlquiler jugador = sum.(map alquiler).(map valor) $ propiedadesActuales jugador
+costoDeAlquiler jugador = sum.(map alquiler).(map valorDeUnaPropiedad) $ propiedadesActuales jugador
 
 cobrarAlquileres :: Accion
 cobrarAlquileres jugador = aplicarTransaccionDeDinero (costoDeAlquiler jugador) jugador
@@ -76,11 +79,11 @@ pagarAAccionistas jugador | esAccionista jugador = aplicarTransaccionDeDinero 20
                           | otherwise = aplicarTransaccionDeDinero (-100) jugador
 
 puedeComprar :: Propiedad->Jugador->Bool
-puedeComprar propiedad jugador = valor propiedad <= dinero jugador
+puedeComprar propiedad jugador = valorDeUnaPropiedad propiedad <= dinero jugador
 
 hacerBerrinchePor :: Propiedad->Accion
 hacerBerrinchePor propiedad jugador 
-      | puedeComprar propiedad jugador = (agregarPropiedad propiedad).(aplicarTransaccionDeDinero (-valor propiedad)) $ jugador
+      | puedeComprar propiedad jugador = adquirirPropiedad propiedad jugador
       | otherwise = (hacerBerrinchePor propiedad).(aplicarTransaccionDeDinero 10).gritar $ jugador 
 
 ejecutarLasAcciones :: [Accion]->Accion
