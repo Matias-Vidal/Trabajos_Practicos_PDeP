@@ -52,9 +52,13 @@ enojarse jugador = (añadirAccion gritar).(aplicarTransaccionDeDinero 50) $ juga
 gritar :: Accion
 gritar jugador = jugador {nombre = "AHHHH " ++ nombre jugador}
 
+
+-- Agregue la condicion que pueda comprar la propiedad para ganarla en la subasta, ya que ganarla
+-- y no poder pagarla no tiene sentido
 subastar :: Propiedad -> Accion
 subastar propiedad jugador   
-   | (esAccionista jugador) || (esOferenteSingular jugador) = adquirirPropiedad propiedad jugador
+   | ((esAccionista jugador) || (esOferenteSingular jugador)) && puedeComprar propiedad jugador =
+       adquirirPropiedad propiedad jugador
    | otherwise = jugador
 
 alquiler :: Int -> Int
