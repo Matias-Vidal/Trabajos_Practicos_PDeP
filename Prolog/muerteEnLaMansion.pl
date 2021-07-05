@@ -19,7 +19,7 @@ mata(Asesino,Victima):-
 ------------------------------Punto 2---------------------------------
 a. Se puede hacer la consulta, si alguien odia a milhouse:
 
-consola > odiaA(Alguien,milhouse).
+consola > odiaA(_,milhouse).
 
 responde False, ya que nadie odia a milhouse.
 
