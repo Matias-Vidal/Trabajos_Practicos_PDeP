@@ -2,13 +2,21 @@ viveEnLaMansionDreadbury(agatha).
 viveEnLaMansionDreadbury(mayordomo).
 viveEnLaMansionDreadbury(charles).
 
-odiaA(agatha,agatha).
-odiaA(agatha,charles).
-odiaA(charles,mayordomo).
-odiaA(mayordomo,agatha).
-odiaA(mayordomo,charles).
+odiaA(agatha,Odiado):-
+    viveEnLaMansionDreadbury(Odiado),
+    Odiado \= mayordomo.
 
-esMasRico(mayordomo,agatha).
+odiaA(charles,Odiado):-
+    viveEnLaMansionDreadbury(Odiado),
+    not(odiaA(agatha,Odiado)).
+
+odiaA(mayordomo,Odiado):-
+    odiaA(agatha,Odiado).
+
+
+esMasRico(Alguien,agatha):-
+    viveEnLaMansionDreadbury(Alguien),
+    not(odiaA(mayordomo,Alguien)).
 
 mata(Asesino,Victima):-
     viveEnLaMansionDreadbury(Asesino),
